@@ -16,7 +16,10 @@ import {
   Text,
   SwitchSynced,
   RecordCard,
-  expandRecord
+  expandRecord,
+  Box,
+  Link,
+  useViewport
 } from "@airtable/blocks/ui"
 import React, { useEffect, useState } from "react"
 
@@ -24,20 +27,24 @@ function PrintRecord({ record, field, view, color, useCard }) {
   const hexColor = colorUtils.getHexForColor(color || colors.GRAY_DARK_1)
   let recordField = field?.id && record?.getCellValueAsString(field?.id)
   let recordName = field?.id && record?.name
+  const viewport = useViewport()
 
   const openRecord = (e) => {
     e.preventDefault()
     expandRecord(record)
   }
 
-  if (useCard && record) return <RecordCard record={record} />
+  if (useCard && record)
+    return <RecordCard record={record} width={viewport.size.width - 40} />
 
   if (!record && (!field || !view))
     return (
       <Heading
         textColor={hexColor}
         size="xxlarge"
-        marginBottom="-5px"
+        width="80%"
+        overflowX="auto"
+        marginBottom="-1"
         textAlign="center"
       >
         Set Settings First
@@ -49,7 +56,9 @@ function PrintRecord({ record, field, view, color, useCard }) {
       <Heading
         textColor={hexColor}
         size="xxlarge"
-        marginBottom="-5px"
+        width="80%"
+        overflowX="auto"
+        marginBottom="-1"
         textAlign="center"
       >
         Record Doesn&apos;t Exist in View
@@ -58,30 +67,45 @@ function PrintRecord({ record, field, view, color, useCard }) {
 
   return (
     <>
-      <a
+      <Link
         href={record?.url}
         onClick={openRecord}
-        style={{ textDecoration: "none" }}
+        target="_blank"
+        width="80%"
+        style={{ overflow: "auto" }}
       >
         <Heading
           textColor={hexColor}
           size="xxlarge"
-          marginBottom="-5px"
+          width="100%"
+          maxHeight="40vh"
+          marginBottom="1"
           textAlign="center"
+          lineHeight="1.5"
         >
           {(record && field && recordField) || `No ${field.name}`}
         </Heading>
-        {recordName !== recordField && (
+      </Link>
+      {recordName !== recordField && (
+        <>
           <Text
             textColor={hexColor}
             textAlign="center"
-            marginTop="-5px"
-            marginBottom="5px"
+            marginBottom="1"
+            variant="default"
           >
-            From Record <b>{recordName}</b>
+            From Record{" "}
+            <Text
+              as="span"
+              textColor={hexColor}
+              fontWeight="strong"
+              variant="default"
+            >
+              {recordName}
+            </Text>
           </Text>
-        )}
-      </a>
+        </>
+      )}
     </>
   )
 }
@@ -100,41 +124,37 @@ function Settings() {
 
   return (
     <>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          height: "100vh",
-          justifyContent: "center",
-          overflowX: "hidden",
-          overflowY: "auto"
-        }}
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        height="100vh"
+        width="100vw"
+        justifyContent="center"
+        overflow="hidden"
       >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            height: "300px",
-            justifyContent: "center",
-            overflowX: "hidden",
-            overflowY: "auto"
-          }}
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          height="80%"
+          width="90%"
+          overflowX="hidden"
+          overflowY="auto"
         >
           <TablePickerSynced
             globalConfigKey="tableId"
             size="large"
-            width="320px"
-            margin="2px"
+            width="95%"
+            margin="1"
             disabled={!config.hasPermissionToSet("tableId")}
           />
           <ViewPickerSynced
             table={table}
             globalConfigKey="viewId"
             size="large"
-            width="320px"
-            margin="2px"
+            width="95%"
+            margin="1"
             disabled={!config.hasPermissionToSet("viewId")}
           />
           {!useCard && (
@@ -142,8 +162,8 @@ function Settings() {
               table={table}
               globalConfigKey="fieldId"
               size="large"
-              width="320px"
-              margin="2px"
+              width="95%"
+              margin="1"
               disabled={!config.hasPermissionToSet("fieldId")}
             />
           )}
@@ -151,23 +171,20 @@ function Settings() {
             globalConfigKey="useCard"
             label="Use a Record Card instead of a Field"
             size="large"
-            width="320px"
-            margin="2px"
+            width="95%"
+            margin="1"
             disabled={!config.hasPermissionToSet("useCard")}
           />
           <ColorPaletteSynced
             globalConfigKey="color"
             allowedColors={allowedColors}
-            width="320px"
-            margin="2px"
-            style={{
-              overflowX: "hidden",
-              overflowY: "auto"
-            }}
+            width="95%"
+            margin="1"
+            style={{ overflow: "visible" }}
             disabled={!config.hasPermissionToSet("color")}
           />
-        </div>
-      </div>
+        </Box>
+      </Box>
     </>
   )
 }
@@ -220,14 +237,12 @@ function Main() {
 
   return (
     <>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          height: "100vh",
-          justifyContent: "center"
-        }}
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        height="100vh"
+        justifyContent="center"
       >
         <PrintRecord
           record={record}
@@ -241,13 +256,17 @@ function Main() {
             <Button
               onClick={generateRandomValue}
               icon="redo"
+              size={{
+                xsmallViewport: "small",
+                smallViewport: "large"
+              }}
               marginTop="1em"
               disabled={!config.hasPermissionToSet("randomId")}
             >
-              Choose Another Random Value
+              Choose Another Record
             </Button>
           )}
-      </div>
+      </Box>
     </>
   )
 }
