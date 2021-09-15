@@ -1,5 +1,5 @@
 {
-  "name": "random-records",
+  "name": "random-record",
   "version": "1.0.0",
   "description": "Select a Random Record from an Airtable View",
   "keywords": [
